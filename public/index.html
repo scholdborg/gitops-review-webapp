@@ -221,6 +221,10 @@ Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
         </p>
         <ol class="steps">
           <li>Review, lint and build all pass in GitHub Actions.</li>
+          <li>The run posts a <strong>&ldquo;What changed in this deploy&rdquo;
+            summary</strong> &mdash; the commits and the list of files changed in
+            this push &mdash; right on the run page, so the reviewer can see what
+            they are approving.</li>
           <li>The run <strong>pauses</strong> and the deployment shows as
             <em>Waiting</em>.</li>
           <li>GitHub <strong>emails the reviewer</strong> an approve/reject
@@ -229,6 +233,11 @@ Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
             publishes. On <strong>Reject</strong>, nothing changes and the live
             site keeps its last version.</li>
         </ol>
+        <p class="hint">
+          Locally, the <code>deploy-status</code> hook shows you the same kind of
+          summary before you push &mdash; the commits that are ahead of
+          <code>origin/main</code> and the files they touch.
+        </p>
         <p class="hint">
           This works on the free plan because the repository is public; for a
           private repo, environment protection rules need a paid GitHub plan.

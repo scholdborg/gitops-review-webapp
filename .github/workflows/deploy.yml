@@ -23,6 +23,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # full history so we can diff this push against its previous commit
+          fetch-depth: 0
+
+      # Render "what changed in this deploy" onto the run page, so the reviewer
+      # who is asked to approve can see the commits and files before approving.
+      - name: Change summary for reviewers
+        if: github.event_name == 'push'
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          REF: ${{ github.ref_name }}
+        run: |
+          {
+            echo "## What changed in this deploy"
+            echo ""
+            echo "Branch \`$REF\` — commit \`${BEFORE:0:7}\` → \`${AFTER:0:7}\`"
+            echo ""
+            if git rev-parse --quiet --verify "$BEFORE^{commit}" >/dev/null 2>&1; then
+              echo "### Commits"
+              git log --pretty='- `%h` %s — %an' "$BEFORE..$AFTER"
+              echo ""
+              echo "### Files changed"
+              echo '```'
+              git diff --stat "$BEFORE" "$AFTER"
+              echo '```'
+            else
+              echo "_Previous commit not available (first deploy); showing latest commit._"
+              echo ""
+              git log -1 --pretty='- `%h` %s — %an' "$AFTER"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

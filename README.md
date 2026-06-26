@@ -138,9 +138,13 @@ ESLint is also a **CI deploy gate**: the GitHub Actions workflow runs
 
 When Claude finishes responding, prints a short GitOps status: current git
 branch, whether the working tree is clean, whether `npm run review` passes,
-whether `npm run build` passes, and a reminder that deployment happens from
-GitHub Actions after pushing to `main`. Always exits `0`; never fails the
-session.
+whether `npm run build` passes, and **a summary of what's about to ship** — the
+commits ahead of `origin/main` and the files they touch — plus a reminder that
+pushing to `main` starts an approval-gated deploy. This is the local counterpart
+to the "What changed in this deploy" summary the reviewer sees in GitHub
+Actions: a hook *can* produce a change summary, but it does so locally (for you,
+before you push), not in the remote approval request. Always exits `0`; never
+fails the session.
 
 ### 4. `flow-language-guard` (PostToolUse, matcher `Write|Edit|MultiEdit`)
 
@@ -207,7 +211,10 @@ environment. That environment is configured (repo **Settings → Environments �
 production → Required reviewers**) with a human reviewer. When a run reaches the
 gate:
 
-1. The `review-build` job finishes (review + lint + build all green).
+1. The `review-build` job finishes (review + lint + build all green) and writes
+   a **"What changed in this deploy"** summary to the run page
+   (`$GITHUB_STEP_SUMMARY`) — the commits and the `git diff --stat` of files
+   changed in this push — so the reviewer can see what they're approving.
 2. The run **pauses** at the `approval` job and the deployment shows as
    *Waiting*.
 3. GitHub **emails** the reviewer a "deployment waiting for review" request

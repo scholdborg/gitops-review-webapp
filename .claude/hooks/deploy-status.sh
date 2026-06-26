@@ -38,8 +38,25 @@ else
   echo "Build:        FAIL" >&2
 fi
 
+# --- What's about to ship? (commits ahead of origin/main) --------------------
+# A hook *can* produce a change summary — locally, before you push. This shows
+# what a push to main would send into the approval-gated deploy.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+   && git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+  ahead="$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)"
+  echo "-------------------------" >&2
+  if [ "${ahead:-0}" -gt 0 ]; then
+    echo "Pending deploy: ${ahead} commit(s) ahead of origin/main:" >&2
+    git log --pretty='  - %h %s' origin/main..HEAD 2>/dev/null | head -10 >&2
+    echo "  files:" >&2
+    git diff --stat origin/main..HEAD 2>/dev/null | sed 's/^/    /' | tail -n +1 | head -12 >&2
+  else
+    echo "Pending deploy: nothing to push (up to date with origin/main)." >&2
+  fi
+fi
+
 echo "-------------------------" >&2
-echo "Reminder: deployment happens from GitHub Actions after you push to 'main'." >&2
+echo "Reminder: pushing to 'main' starts an approval-gated GitHub Actions deploy." >&2
 echo "=========================" >&2
 
 exit 0
