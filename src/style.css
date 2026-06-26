@@ -23,9 +23,18 @@ body {
 }
 
 .page {
-  max-width: 720px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+/* Keep running prose comfortably readable even though the frame is wide. */
+.tagline,
+.flow p,
+.workflow p,
+.compare > p,
+.hooks > p {
+  max-width: 70ch;
 }
 
 h1 {
@@ -187,7 +196,9 @@ code {
   margin-top: 1rem;
 }
 
-@media (max-width: 640px) {
+/* Below this width the two terminals would get too narrow and scroll, so stack
+   them full-width instead. */
+@media (max-width: 900px) {
   .compare-grid {
     grid-template-columns: 1fr;
   }
