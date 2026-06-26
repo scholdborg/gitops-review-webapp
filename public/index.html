@@ -199,6 +199,40 @@ Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
             whether review and build pass &mdash; at the end of a turn.
           </dd>
         </dl>
+
+        <p class="note">
+          <strong>Note:</strong> the <em>Approve</em> step in the pipeline is
+          <strong>not</strong> one of these hooks. Hooks run locally in the
+          coding session for fast feedback. Approval is a
+          <strong>GitHub Actions</strong> environment rule that runs in the
+          cloud after you push: the deploy pauses, the required reviewer gets an
+          email, and nothing goes live until they click <em>Approve</em>. Two
+          complementary gates &mdash; a local one while you write, and a remote
+          one that authorizes the real deployment.
+        </p>
+      </section>
+
+      <section class="approval" aria-label="Approval gate">
+        <h2>The approval gate (human in the loop)</h2>
+        <p>
+          Even after every automated check passes, the deployment waits for a
+          person. The workflow pauses on a protected <code>production</code>
+          environment that has a <strong>required reviewer</strong>.
+        </p>
+        <ol class="steps">
+          <li>Review, lint and build all pass in GitHub Actions.</li>
+          <li>The run <strong>pauses</strong> and the deployment shows as
+            <em>Waiting</em>.</li>
+          <li>GitHub <strong>emails the reviewer</strong> an approve/reject
+            request (you can also approve from the Actions run page).</li>
+          <li>On <strong>Approve</strong>, the deploy job runs and GitHub Pages
+            publishes. On <strong>Reject</strong>, nothing changes and the live
+            site keeps its last version.</li>
+        </ol>
+        <p class="hint">
+          This works on the free plan because the repository is public; for a
+          private repo, environment protection rules need a paid GitHub plan.
+        </p>
       </section>
 
       <section class="status" id="status">

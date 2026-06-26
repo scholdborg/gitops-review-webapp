@@ -207,16 +207,43 @@ environment. That environment is configured (repo **Settings → Environments �
 production → Required reviewers**) with a human reviewer. When a run reaches the
 gate:
 
-- GitHub **emails** the reviewer a "deployment waiting for review" request (email
-  delivery depends on your GitHub notification settings; you can always approve
-  from the **Actions** run page, which shows a **Review deployments** button).
-- Click **Approve and deploy** to let the `deploy` job run, or **Reject** to stop
-  it. Approvals/rejections are recorded on the deployment.
+1. The `review-build` job finishes (review + lint + build all green).
+2. The run **pauses** at the `approval` job and the deployment shows as
+   *Waiting*.
+3. GitHub **emails** the reviewer a "deployment waiting for review" request
+   (email delivery depends on your GitHub notification settings; you can always
+   approve from the **Actions** run page, which shows a **Review deployments**
+   button).
+4. The reviewer clicks **Approve and deploy** (optionally leaving a comment) to
+   let the `deploy` job run, or **Reject** to stop it. The decision is recorded
+   on the deployment for audit.
+5. Only after approval does GitHub Pages publish the new version.
 
 This requires a **public** repo on the free plan (environment protection rules
 are a paid feature for private repos). Self-review is allowed, so the same person
 who pushes can approve. To change reviewers, edit the `production` environment in
 repo settings.
+
+#### Is the approval gate a Claude Code hook? No — and that's the point
+
+This project has **two different kinds of gate**, and it helps to keep them
+straight:
+
+| | **Claude Code hooks** (`guard-dog`, `local-review`, …) | **Approval gate** |
+| --- | --- | --- |
+| Runs | locally, in your Claude Code session | remotely, in GitHub Actions |
+| When | while you edit (before/after a tool, on stop) | after push, before deploy |
+| Enforced by | Claude Code on your machine | GitHub's servers |
+| Bypassable | yes — it is local | no — it is a server-side rule on the deployment |
+| Best at | fast feedback while coding | **authorizing the real deployment** |
+
+A local hook **cannot** be a real deployment-approval gate: it only affects your
+machine, it can't email an external reviewer, and it leaves no auditable record
+on the deployment. Approval has to live where the deploy happens (GitHub
+Actions / Pages) to actually be a gate. So the hooks and the approval gate are
+**complementary layers** of the same "don't ship without checks" idea — not the
+same mechanism. (If you wanted, a local hook could *remind* you that pushing to
+`main` triggers an approval-gated deploy, but it would not be the authority.)
 
 ### One-time GitHub Pages setup
 
