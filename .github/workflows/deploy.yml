@@ -40,6 +40,9 @@ jobs:
       - name: Run code review (deploy gate)
         run: npm run review
 
+      - name: Lint with ESLint (deploy gate)
+        run: npm run lint
+
       - name: Build site
         run: npm run build
 

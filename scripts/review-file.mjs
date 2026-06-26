@@ -4,8 +4,11 @@
 // local-review more than a blanket scan: it looks closely at whatever Claude
 // just touched.
 //
+// For JavaScript it runs the REAL ESLint engine (flat config in
+// eslint.config.js). For everything else it uses lightweight text checks.
+//
 // Severity:
-//   ERROR  -> high severity (merge markers, debugger). Exit code 1.
+//   ERROR  -> high severity (merge markers, ESLint errors). Exit code 1.
 //   warn   -> advisory only. Does not affect exit code.
 //
 // Prints a short report and exits 1 if any ERROR-level finding exists, else 0.
@@ -49,13 +52,25 @@ lines.forEach((l) => {
 if (trailing) warnings.push(`${trailing} line(s) with trailing whitespace`);
 if (longLines) warnings.push(`${longLines} line(s) longer than 120 chars`);
 
-// --- JavaScript -------------------------------------------------------------
-if (ext === ".js" || ext === ".mjs") {
-  lines.forEach((l, i) => {
-    if (/\bdebugger\b/.test(l)) errors.push(`leftover debugger statement (${at(i)})`);
-    const c = l.match(/console\.(log|debug|info)\s*\(/);
-    if (c) warnings.push(`console.${c[1]} call (${at(i)})`);
-  });
+// --- JavaScript: run the real ESLint engine ---------------------------------
+if (ext === ".js" || ext === ".mjs" || ext === ".cjs") {
+  try {
+    const { ESLint } = await import("eslint");
+    const eslint = new ESLint();
+    const results = await eslint.lintFiles([file]);
+    for (const res of results) {
+      for (const msg of res.messages) {
+        const where = msg.line ? ` (line ${msg.line})` : "";
+        const rule = msg.ruleId ? `${msg.ruleId}: ` : "";
+        const label = `eslint ${rule}${msg.message}${where}`;
+        if (msg.severity === 2) errors.push(label);
+        else warnings.push(label);
+      }
+    }
+  } catch (e) {
+    // ESLint not installed (e.g. fresh clone before `npm install`) — degrade.
+    warnings.push(`eslint unavailable (${e && e.code ? e.code : "skipped"})`);
+  }
 }
 
 // --- HTML -------------------------------------------------------------------

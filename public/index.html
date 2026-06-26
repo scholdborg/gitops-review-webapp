@@ -170,12 +170,12 @@ Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
           <dt>local-review <span class="tag">after each edit</span></dt>
           <dd>
             The smart one. After every edit it (1) re-runs the whole-project
-            review, (2) runs <em>targeted</em> checks on the exact file you just
-            changed &mdash; merge markers, leftover <code>debugger</code>,
-            <code>console.log</code>, long lines, missing image
-            <code>alt</code> text &mdash; and (3) hands the combined summary back
-            to Claude so it can fix issues on the spot. Advisory by default;
-            it can be switched to block on serious findings.
+            review, (2) runs <strong>real ESLint</strong> on the JavaScript file
+            you just changed (plus text checks like merge markers, long lines,
+            and missing image <code>alt</code> text), and (3) hands the combined
+            summary back to Claude so it can fix issues on the spot. It
+            <strong>blocks</strong> the turn on serious findings &mdash; an
+            ESLint error or a merge marker stops work until it is fixed.
           </dd>
 
           <dt>flow-language-guard <span class="tag">after each edit</span></dt>

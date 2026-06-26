@@ -7,9 +7,15 @@
   "scripts": {
     "review": "node scripts/simple-review.mjs",
     "review:file": "node scripts/review-file.mjs",
+    "lint": "eslint .",
     "check:flow-language": "node scripts/check-flow-language.mjs",
     "build": "mkdir -p dist && cp -r public/* dist/ && cp -r src dist/",
     "check": "npm run review && npm run build"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "globals": "^17.7.0"
+  }
 }

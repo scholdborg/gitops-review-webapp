@@ -35,18 +35,21 @@ apply to anyone who opens this repo in Claude Code.
   fast feedback — the same review that gates deployment in CI.
 - **What it does (beyond the basics):** it is *file-aware*. It reads the edited
   file's path from the tool payload (`tool_input.file_path`) and runs
-  `scripts/review-file.mjs` on that one file — targeted checks for merge
-  markers, `debugger`, `console.*`, `TODO/FIXME`, long lines, missing `alt`/
-  `lang` in HTML — on top of the project-wide `npm run review`.
+  `scripts/review-file.mjs` on that one file — on top of the project-wide
+  `npm run review`. For JavaScript it runs the **real ESLint engine** (flat
+  config in `eslint.config.js`); for other files it does light text checks
+  (merge markers, `TODO/FIXME`, long lines, missing `alt`/`lang` in HTML).
+- **Why ESLint over regex:** the first version grepped for the word `debugger`
+  and wrongly flagged it inside the string `"no-debugger"` in the ESLint config.
+  ESLint parses the code, so it doesn't make that mistake. Real tool > regex.
 - **It talks back to Claude:** instead of only printing to the transcript, it
   emits PostToolUse JSON with `hookSpecificOutput.additionalContext`, so the
   combined summary is injected into the assistant's context and it can act on
   the findings.
-- **Why non-blocking by default:** while the project is still being built up, a
-  failing review shouldn't stop further edits, so it always exits `0`. Set
-  `LOCAL_REVIEW_BLOCK=1` to escalate ERROR-level findings (merge markers,
-  `debugger`) to a blocking exit `2`. The *real* gate is still GitHub Actions on
-  push to `main`.
+- **Blocking by default:** ERROR-level findings (merge markers, ESLint errors)
+  return exit `2` and stop the turn so they get fixed; `warn` findings never
+  block. Set `LOCAL_REVIEW_BLOCK=0` to make it fully advisory. ESLint is *also*
+  a CI gate (`npm run lint` in the workflow), so a lint error blocks deploy too.
 
 ### `deploy-status` → `Stop`
 

@@ -8,9 +8,10 @@
 #   3. Feeds a combined summary back to Claude as `additionalContext` (PostToolUse
 #      JSON output), so the assistant — not just the human — sees the result.
 #
-# It is advisory by default: it always exits 0 and never blocks editing. Set
-# LOCAL_REVIEW_BLOCK=1 to make high-severity per-file findings (merge markers,
-# leftover debugger) return exit 2 and stop the turn instead.
+# By default it BLOCKS on high-severity per-file findings (merge markers and
+# real ESLint errors): those return exit 2 and stop the turn so they get fixed.
+# Advisory "warn" findings never block. Set LOCAL_REVIEW_BLOCK=0 to make the
+# hook fully advisory (always exit 0) instead.
 
 set -uo pipefail
 
@@ -70,7 +71,7 @@ summary="$(
 
 # --- 6. Decide exit code -----------------------------------------------------
 exit_code=0
-if [ "${LOCAL_REVIEW_BLOCK:-0}" = "1" ] && [ "$file_rc" -ne 0 ]; then
+if [ "${LOCAL_REVIEW_BLOCK:-1}" = "1" ] && [ "$file_rc" -ne 0 ]; then
   exit_code=2
 fi
 

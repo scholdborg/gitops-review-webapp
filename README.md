@@ -113,19 +113,26 @@ After Claude writes or edits a file, this hook does three things:
    that file. It applies file-type-specific checks:
    - **any file:** merge-conflict markers (`<<<<<<<`), unfinished-work markers
      (`TODO`/`FIXME`/`XXX`/`HACK`), trailing whitespace, lines over 120 chars.
-   - **`.js` / `.mjs`:** leftover `debugger` statements, `console.log/debug/info`.
+   - **`.js` / `.mjs` / `.cjs`:** the **real ESLint engine** (flat config in
+     `eslint.config.js`) — e.g. `no-debugger`, `no-unused-vars`,
+     `no-undef`. ESLint errors are real errors; it does not get fooled by, say,
+     the word `debugger` inside a string the way a regex would.
    - **`.html`:** `<img>` without `alt`, `<html>` without a `lang` attribute.
    - large-file warning (> 200 KB).
-   Findings are graded **ERROR** (high severity: merge markers, `debugger`) or
-   **warn** (advisory).
+   Findings are graded **ERROR** (merge markers, ESLint errors) or **warn**
+   (advisory). If ESLint isn't installed yet, that step degrades to a warning.
 3. **Feeds the result back to Claude** — emits PostToolUse JSON with
    `hookSpecificOutput.additionalContext`, so the *assistant* sees the combined
    summary and can react, not just the human reading the transcript.
 
-By default it is **advisory and never blocks** (always exits `0`). Set
-`LOCAL_REVIEW_BLOCK=1` (an env var) to make ERROR-level per-file findings return
-exit `2` and stop the turn instead. Run the per-file check by hand with
-`npm run review:file -- <path>`.
+By default it **blocks** on ERROR-level per-file findings: those return exit `2`
+and stop the turn so they get fixed. Advisory `warn` findings never block. Set
+`LOCAL_REVIEW_BLOCK=0` (an env var) to make the hook fully advisory (always exit
+`0`). Run the per-file check by hand with `npm run review:file -- <path>`, and
+lint the whole project with `npm run lint`.
+
+ESLint is also a **CI deploy gate**: the GitHub Actions workflow runs
+`npm run lint` between review and build, so a lint error blocks deployment too.
 
 ### 3. `deploy-status` (Stop)
 
