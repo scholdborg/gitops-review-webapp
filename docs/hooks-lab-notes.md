@@ -33,9 +33,20 @@ apply to anyone who opens this repo in Claude Code.
 - **Why this event:** `PostToolUse` fires *after* a tool succeeds. After Claude
   writes or edits a file, it's the natural moment to re-run the review and get
   fast feedback — the same review that gates deployment in CI.
-- **Why non-blocking:** while the project is still being built up, a failing
-  review shouldn't stop further edits. The hook always exits `0` and just prints
-  the current status. The *real* gate is GitHub Actions on push to `main`.
+- **What it does (beyond the basics):** it is *file-aware*. It reads the edited
+  file's path from the tool payload (`tool_input.file_path`) and runs
+  `scripts/review-file.mjs` on that one file — targeted checks for merge
+  markers, `debugger`, `console.*`, `TODO/FIXME`, long lines, missing `alt`/
+  `lang` in HTML — on top of the project-wide `npm run review`.
+- **It talks back to Claude:** instead of only printing to the transcript, it
+  emits PostToolUse JSON with `hookSpecificOutput.additionalContext`, so the
+  combined summary is injected into the assistant's context and it can act on
+  the findings.
+- **Why non-blocking by default:** while the project is still being built up, a
+  failing review shouldn't stop further edits, so it always exits `0`. Set
+  `LOCAL_REVIEW_BLOCK=1` to escalate ERROR-level findings (merge markers,
+  `debugger`) to a blocking exit `2`. The *real* gate is still GitHub Actions on
+  push to `main`.
 
 ### `deploy-status` → `Stop`
 

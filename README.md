@@ -105,10 +105,27 @@ Anything else exits `0` (allowed).
 
 ### 2. `local-review` (PostToolUse, matcher `Write|Edit|MultiEdit`)
 
-After Claude writes or edits a file, runs `npm run review` from
-`$CLAUDE_PROJECT_DIR` and prints a short result. It **never blocks editing** —
-it always exits `0`, but clearly prints the failure so you can see the current
-review status while the project is still being built up.
+After Claude writes or edits a file, this hook does three things:
+
+1. **Project-wide review** — runs `npm run review` from `$CLAUDE_PROJECT_DIR`.
+2. **Targeted, file-aware review** — reads the edited file's path from the tool
+   payload (`tool_input.file_path`) and runs `scripts/review-file.mjs` on just
+   that file. It applies file-type-specific checks:
+   - **any file:** merge-conflict markers (`<<<<<<<`), unfinished-work markers
+     (`TODO`/`FIXME`/`XXX`/`HACK`), trailing whitespace, lines over 120 chars.
+   - **`.js` / `.mjs`:** leftover `debugger` statements, `console.log/debug/info`.
+   - **`.html`:** `<img>` without `alt`, `<html>` without a `lang` attribute.
+   - large-file warning (> 200 KB).
+   Findings are graded **ERROR** (high severity: merge markers, `debugger`) or
+   **warn** (advisory).
+3. **Feeds the result back to Claude** — emits PostToolUse JSON with
+   `hookSpecificOutput.additionalContext`, so the *assistant* sees the combined
+   summary and can react, not just the human reading the transcript.
+
+By default it is **advisory and never blocks** (always exits `0`). Set
+`LOCAL_REVIEW_BLOCK=1` (an env var) to make ERROR-level per-file findings return
+exit `2` and stop the turn instead. Run the per-file check by hand with
+`npm run review:file -- <path>`.
 
 ### 3. `deploy-status` (Stop)
 

@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "review": "node scripts/simple-review.mjs",
+    "review:file": "node scripts/review-file.mjs",
     "check:flow-language": "node scripts/check-flow-language.mjs",
     "build": "mkdir -p dist && cp -r public/* dist/ && cp -r src dist/",
     "check": "npm run review && npm run build"

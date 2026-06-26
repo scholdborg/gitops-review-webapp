@@ -169,8 +169,13 @@ Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
 
           <dt>local-review <span class="tag">after each edit</span></dt>
           <dd>
-            Re-runs the automated code review after a file is written or edited,
-            so problems surface immediately.
+            The smart one. After every edit it (1) re-runs the whole-project
+            review, (2) runs <em>targeted</em> checks on the exact file you just
+            changed &mdash; merge markers, leftover <code>debugger</code>,
+            <code>console.log</code>, long lines, missing image
+            <code>alt</code> text &mdash; and (3) hands the combined summary back
+            to Claude so it can fix issues on the spot. Advisory by default;
+            it can be switched to block on serious findings.
           </dd>
 
           <dt>flow-language-guard <span class="tag">after each edit</span></dt>
