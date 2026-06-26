@@ -6,6 +6,7 @@
   --muted: #9da7b3;
   --accent: #2ea043;
   --accent-soft: #238636;
+  --danger: #f85149;
 }
 
 * {
@@ -136,10 +137,139 @@ code {
   padding: 0.15rem 0;
 }
 
-.ok {
+.ok-check {
   color: var(--accent);
   font-weight: 700;
   margin-right: 0.5rem;
+}
+
+/* --- secondary text / hints ------------------------------------------------ */
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.status-badge {
+  margin-top: 0.75rem;
+}
+
+/* --- workflow steps -------------------------------------------------------- */
+.lane-title {
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin: 1.25rem 0 0.25rem;
+}
+
+.lane-title:first-of-type {
+  margin-top: 0.5rem;
+}
+
+.steps {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.steps li {
+  margin: 0.5rem 0;
+}
+
+.steps li::marker {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* --- success vs failure comparison ----------------------------------------- */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.case {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem 1rem;
+  background: #0d1117;
+}
+
+.case h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.case-pass {
+  border-color: rgba(46, 160, 67, 0.5);
+}
+
+.case-fail {
+  border-color: rgba(248, 81, 73, 0.5);
+}
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.ok {
+  background: var(--accent);
+}
+
+.dot.bad {
+  background: var(--danger);
+}
+
+.terminal {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #c9d1d9;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.pass {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.fail {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.outcome {
+  font-size: 0.85rem;
+  margin: 0.7rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+}
+
+.outcome-ok {
+  background: rgba(46, 160, 67, 0.12);
+  color: var(--text);
+}
+
+.outcome-bad {
+  background: rgba(248, 81, 73, 0.12);
+  color: var(--text);
 }
 
 footer {

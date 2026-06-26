@@ -12,8 +12,10 @@
         <h1>GitOps Review Webapp</h1>
         <p class="tagline">
           A tiny static site that ships the GitOps way: every change is
-          reviewed and built before it is allowed to go live.
+          automatically reviewed and built, and only goes live if every check
+          passes.
         </p>
+        <p class="status-badge">Deployed from Git after checks pass</p>
       </header>
 
       <section class="flow">
@@ -37,14 +39,125 @@
           <span class="arrow">&rarr;</span>
           <span class="stage">Deploy</span>
         </div>
+        <p class="hint">
+          Each arrow is a gate. If a stage fails, the pipeline stops there and
+          nothing new is deployed &mdash; the live site keeps its last good
+          version.
+        </p>
+      </section>
+
+      <section class="workflow">
+        <h2>How the workflow works, step by step</h2>
+
+        <h3 class="lane-title">1 &middot; On your machine (Claude Code hooks)</h3>
+        <ol class="steps">
+          <li>
+            <strong>You ask Claude to change a file.</strong> Before any shell
+            command runs, the <em>guard-dog</em> hook inspects it and blocks
+            dangerous ones (like a forced push or a recursive delete).
+          </li>
+          <li>
+            <strong>Claude writes the change.</strong> Right after the edit, the
+            <em>local-review</em> hook re-runs the automated review, and
+            <em>flow-language-guard</em> checks that the Swedish text box is still
+            Swedish. You get feedback in seconds, before anything is committed.
+          </li>
+          <li>
+            <strong>Claude finishes its turn.</strong> The <em>deploy-status</em>
+            hook prints a short summary: your branch, whether the working tree is
+            clean, and whether review and build pass.
+          </li>
+        </ol>
+
+        <h3 class="lane-title">2 &middot; In the cloud (GitHub Actions)</h3>
+        <ol class="steps" start="4">
+          <li>
+            <strong>You commit and push to <code>main</code>.</strong> Git is the
+            single source of truth for what should be live.
+          </li>
+          <li>
+            <strong>GitHub Actions runs the gate.</strong> It checks out the code,
+            installs dependencies, runs <code>npm run review</code>, then
+            <code>npm run build</code> to assemble the site into <code>dist/</code>.
+          </li>
+          <li>
+            <strong>Deploy only if the gate is green.</strong> The deploy job
+            depends on the review-and-build job. If review or build fails, deploy
+            is skipped automatically.
+          </li>
+          <li>
+            <strong>GitHub Pages publishes <code>dist/</code>.</strong> The new
+            version becomes the live site at this URL.
+          </li>
+        </ol>
+      </section>
+
+      <section class="compare">
+        <h2>What it looks like: passing vs. failing</h2>
+        <p>
+          The review is just a script that prints <span class="pass">PASS</span>
+          or <span class="fail">FAIL</span> lines and exits with a success or
+          error code. Hooks and GitHub Actions both read that code to decide what
+          happens next.
+        </p>
+
+        <div class="compare-grid">
+          <article class="case case-pass">
+            <h3><span class="dot ok"></span> Successful run</h3>
+            <pre class="terminal" aria-label="Example of a passing run">
+$ npm run review
+
+=== Simple Code Review ===
+  <span class="pass">PASS</span>  required file present: public/index.html
+  <span class="pass">PASS</span>  index.html contains a non-empty &lt;title&gt;
+  <span class="pass">PASS</span>  no obvious secrets found
+  <span class="pass">PASS</span>  no console.log in src/main.js
+  <span class="pass">PASS</span>  flow text is Swedish
+--------------------------
+Result: <span class="pass">PASS</span> (7 checks ok)
+
+$ npm run build        # dist/ created
+Deploy: <span class="pass">published to GitHub Pages &#10003;</span></pre>
+            <p class="outcome outcome-ok">
+              Exit code <code>0</code> &rarr; the gate is green &rarr; GitHub
+              Pages serves the new version.
+            </p>
+          </article>
+
+          <article class="case case-fail">
+            <h3><span class="dot bad"></span> Failing run</h3>
+            <pre class="terminal" aria-label="Example of a failing run">
+$ npm run review
+
+=== Simple Code Review ===
+  <span class="pass">PASS</span>  required file present: public/index.html
+  <span class="fail">FAIL</span>  console.log found in src/main.js
+  <span class="fail">FAIL</span>  flow text must be written in Swedish
+--------------------------
+Result: <span class="fail">FAIL</span> (2 problems)
+
+# a risky command is also stopped locally:
+[guard-dog] <span class="fail">BLOCKED</span>: git push --force
+Deploy: <span class="fail">skipped &mdash; checks did not pass</span></pre>
+            <p class="outcome outcome-bad">
+              Exit code <code>1</code> &rarr; the gate is red &rarr; deploy is
+              skipped and the live site is unchanged.
+            </p>
+          </article>
+        </div>
+
+        <p class="hint">
+          A failure is never silent: the failing check is named, the deploy is
+          skipped, and you fix the one thing it points at and push again.
+        </p>
       </section>
 
       <section class="hooks" aria-label="Claude Code hooks">
-        <h2>Hooks (the quality gates)</h2>
+        <h2>The hooks (your quality gates)</h2>
         <p>
-          This project uses Claude Code hooks &mdash; small scripts that run
-          automatically at points in the assistant's lifecycle. They keep edits
-          safe and on-policy before anything is ever committed or deployed.
+          Hooks are small scripts Claude Code runs automatically at points in its
+          lifecycle. They keep edits safe and on-policy before anything is ever
+          committed or deployed.
         </p>
         <dl class="hook-list">
           <dt>guard-dog <span class="tag">before a shell command</span></dt>
@@ -63,8 +176,8 @@
           <dt>flow-language-guard <span class="tag">after each edit</span></dt>
           <dd>
             Requires the <em>Flödet</em> text box above to be written in Swedish,
-            and blocks the change if it is not. (That is why this page is
-            partly in Swedish!)
+            and blocks the change if it is not. (That is why this page is partly
+            in Swedish!)
           </dd>
 
           <dt>deploy-status <span class="tag">when the assistant stops</span></dt>
@@ -76,16 +189,15 @@
       </section>
 
       <section class="status" id="status">
-        <h2>Status</h2>
-        <p class="status-badge">Deployed from Git after checks pass</p>
+        <h2>Status of this deployment</h2>
         <p class="status-detail">
           This build went live because every gate passed in GitHub Actions:
         </p>
         <ul class="checks">
-          <li><span class="ok">&#10003;</span> Code review passed</li>
-          <li><span class="ok">&#10003;</span> Flow text language check passed (Swedish)</li>
-          <li><span class="ok">&#10003;</span> Build succeeded</li>
-          <li><span class="ok">&#10003;</span> Published to GitHub Pages</li>
+          <li><span class="ok-check">&#10003;</span> Code review passed</li>
+          <li><span class="ok-check">&#10003;</span> Flow text language check passed (Swedish)</li>
+          <li><span class="ok-check">&#10003;</span> Build succeeded</li>
+          <li><span class="ok-check">&#10003;</span> Published to GitHub Pages</li>
         </ul>
         <p id="status-detail" class="status-detail"></p>
       </section>
