@@ -193,9 +193,30 @@ You can also run the hook scripts directly from a terminal — see
 
 1. **Commit** your changes to Git.
 2. **Push to `main`.**
-3. **GitHub Actions** runs the `Review and Deploy` workflow: review → build →
-   deploy. If review or build fails, the deploy job does not run.
-4. **GitHub Pages** serves the published `dist/` as the live site.
+3. **GitHub Actions** runs the `Review and Deploy` workflow: review → lint →
+   build. If any of these fail, the deploy does not run.
+4. **A reviewer approves.** The run pauses on the protected `production`
+   environment and GitHub emails the required reviewer (see below). Nothing
+   deploys until someone clicks **Approve**.
+5. **GitHub Pages** serves the published `dist/` as the live site.
+
+### Manual approval gate (required reviewer)
+
+The workflow has an `approval` job that targets a protected `production`
+environment. That environment is configured (repo **Settings → Environments →
+production → Required reviewers**) with a human reviewer. When a run reaches the
+gate:
+
+- GitHub **emails** the reviewer a "deployment waiting for review" request (email
+  delivery depends on your GitHub notification settings; you can always approve
+  from the **Actions** run page, which shows a **Review deployments** button).
+- Click **Approve and deploy** to let the `deploy` job run, or **Reject** to stop
+  it. Approvals/rejections are recorded on the deployment.
+
+This requires a **public** repo on the free plan (environment protection rules
+are a paid feature for private repos). Self-review is allowed, so the same person
+who pushes can approve. To change reviewers, edit the `production` environment in
+repo settings.
 
 ### One-time GitHub Pages setup
 

@@ -83,6 +83,12 @@ section {
   font-size: 1.2rem;
 }
 
+/* the manual approval gate stands out from the automated stages */
+.stage-approve {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .status-badge {
   display: inline-block;
   background: var(--accent-soft);

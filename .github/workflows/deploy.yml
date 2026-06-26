@@ -54,9 +54,21 @@ jobs:
         with:
           path: dist
 
-  # Deploy job: only runs if review-build succeeded.
-  deploy:
+  # Manual approval gate. This job targets the `production` environment, which
+  # has a required reviewer configured in the repo settings. The run PAUSES here
+  # and GitHub emails the reviewer an Approve/Reject request; nothing deploys
+  # until it is approved. Only runs if review + build + lint passed.
+  approval:
     needs: review-build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Approved
+        run: echo "Human approval granted — proceeding to deploy."
+
+  # Deploy job: only runs after checks pass AND a reviewer approves.
+  deploy:
+    needs: [review-build, approval]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

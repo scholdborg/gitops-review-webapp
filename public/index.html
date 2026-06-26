@@ -37,6 +37,8 @@
           <span class="arrow">&rarr;</span>
           <span class="stage">Build</span>
           <span class="arrow">&rarr;</span>
+          <span class="stage stage-approve">Approve</span>
+          <span class="arrow">&rarr;</span>
           <span class="stage">Deploy</span>
         </div>
         <p class="hint">
@@ -86,8 +88,14 @@
             is skipped automatically.
           </li>
           <li>
-            <strong>GitHub Pages publishes <code>dist/</code>.</strong> The new
-            version becomes the live site at this URL.
+            <strong>A human approves.</strong> The run then pauses on a protected
+            <code>production</code> environment. GitHub emails the required
+            reviewer an Approve/Reject request, and nothing deploys until someone
+            clicks <em>Approve</em>.
+          </li>
+          <li>
+            <strong>GitHub Pages publishes <code>dist/</code>.</strong> After
+            approval, the new version becomes the live site at this URL.
           </li>
         </ol>
       </section>
