@@ -1,0 +1,13 @@
+{
+  "name": "gitops-review-webapp",
+  "version": "1.0.0",
+  "description": "Tiny static webapp with an ArgoCD/GitOps-inspired flow: code change -> automated review -> build -> deploy to GitHub Pages only if checks pass.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "review": "node scripts/simple-review.mjs",
+    "build": "mkdir -p dist && cp -r public/* dist/ && cp -r src dist/",
+    "check": "npm run review && npm run build"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitOps Review Webapp</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <h1>GitOps Review Webapp</h1>
+        <p class="tagline">
+          A tiny static site that ships the GitOps way: every change is
+          reviewed and built before it is allowed to go live.
+        </p>
+      </header>
+
+      <section class="flow">
+        <h2>The flow</h2>
+        <p>
+          A code change is automatically reviewed, then built, and only deployed
+          to GitHub Pages if every check passes. Git is the source of truth, and
+          GitHub Actions is the gate that decides whether the change reaches the
+          live site.
+        </p>
+      </section>
+
+      <section class="pipeline" aria-label="Deployment pipeline">
+        <h2>Pipeline</h2>
+        <div class="pipeline-track">
+          <span class="stage">Commit</span>
+          <span class="arrow">&rarr;</span>
+          <span class="stage">Review</span>
+          <span class="arrow">&rarr;</span>
+          <span class="stage">Build</span>
+          <span class="arrow">&rarr;</span>
+          <span class="stage">Deploy</span>
+        </div>
+      </section>
+
+      <section class="status" id="status">
+        <h2>Status</h2>
+        <p class="status-badge">Deployed from Git after checks pass</p>
+        <p id="status-detail" class="status-detail"></p>
+      </section>
+
+      <footer>
+        <p>ArgoCD-inspired demo &middot; GitHub Actions gate &middot; GitHub Pages host</p>
+      </footer>
+    </main>
+
+    <script src="src/main.js"></script>
+  </body>
+</html>
