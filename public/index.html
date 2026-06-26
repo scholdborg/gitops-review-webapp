@@ -17,12 +17,12 @@
       </header>
 
       <section class="flow">
-        <h2>The flow</h2>
-        <p>
-          A code change is automatically reviewed, then built, and only deployed
-          to GitHub Pages if every check passes. Git is the source of truth, and
-          GitHub Actions is the gate that decides whether the change reaches the
-          live site.
+        <h2>Flödet</h2>
+        <p id="flow-text">
+          En kodändring granskas automatiskt, byggs sedan, och driftsätts till
+          GitHub Pages endast om alla kontroller godkänns. Git är den enda källan
+          till sanning, och GitHub Actions är grinden som avgör om ändringen når
+          den publicerade webbplatsen.
         </p>
       </section>
 
@@ -39,9 +39,54 @@
         </div>
       </section>
 
+      <section class="hooks" aria-label="Claude Code hooks">
+        <h2>Hooks (the quality gates)</h2>
+        <p>
+          This project uses Claude Code hooks &mdash; small scripts that run
+          automatically at points in the assistant's lifecycle. They keep edits
+          safe and on-policy before anything is ever committed or deployed.
+        </p>
+        <dl class="hook-list">
+          <dt>guard-dog <span class="tag">before a shell command</span></dt>
+          <dd>
+            Blocks risky commands before they run, such as
+            <code>rm -rf</code>, <code>git push --force</code>, and
+            <code>npm publish</code>.
+          </dd>
+
+          <dt>local-review <span class="tag">after each edit</span></dt>
+          <dd>
+            Re-runs the automated code review after a file is written or edited,
+            so problems surface immediately.
+          </dd>
+
+          <dt>flow-language-guard <span class="tag">after each edit</span></dt>
+          <dd>
+            Requires the <em>Flödet</em> text box above to be written in Swedish,
+            and blocks the change if it is not. (That is why this page is
+            partly in Swedish!)
+          </dd>
+
+          <dt>deploy-status <span class="tag">when the assistant stops</span></dt>
+          <dd>
+            Prints a GitOps-style summary &mdash; branch, working-tree state, and
+            whether review and build pass &mdash; at the end of a turn.
+          </dd>
+        </dl>
+      </section>
+
       <section class="status" id="status">
         <h2>Status</h2>
         <p class="status-badge">Deployed from Git after checks pass</p>
+        <p class="status-detail">
+          This build went live because every gate passed in GitHub Actions:
+        </p>
+        <ul class="checks">
+          <li><span class="ok">&#10003;</span> Code review passed</li>
+          <li><span class="ok">&#10003;</span> Flow text language check passed (Swedish)</li>
+          <li><span class="ok">&#10003;</span> Build succeeded</li>
+          <li><span class="ok">&#10003;</span> Published to GitHub Pages</li>
+        </ul>
         <p id="status-detail" class="status-detail"></p>
       </section>
 

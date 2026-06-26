@@ -11,6 +11,7 @@ hook lifecycle, supporting a GitOps-style flow: commit → review → build → 
 | `guard-dog`     | `PreToolUse`    | `Bash`                   | `.claude/hooks/guard-dog.sh`   |
 | `local-review`  | `PostToolUse`   | `Write\|Edit\|MultiEdit` | `.claude/hooks/local-review.sh`|
 | `deploy-status` | `Stop`          | _(none — runs always)_   | `.claude/hooks/deploy-status.sh`|
+| `flow-language-guard` | `PostToolUse` | `Write\|Edit\|MultiEdit` | `.claude/hooks/flow-language-guard.sh` |
 
 All three are registered in `.claude/settings.json` (project scope), so they
 apply to anyone who opens this repo in Claude Code.
@@ -43,6 +44,19 @@ apply to anyone who opens this repo in Claude Code.
   tree, review pass/fail, build pass/fail) and reminds you that deployment
   happens from GitHub Actions after pushing to `main`. It is purely
   informational and always exits `0`.
+
+### `flow-language-guard` → `PostToolUse`
+
+- **Why this event:** like `local-review`, it reacts to edits — but instead of
+  the generic review it enforces a *content policy*: the flow text box
+  (`<p id="flow-text">` in `public/index.html`) must be in Swedish.
+- **Why blocking (exit 2):** the rule is a hard requirement ("must be Swedish"),
+  so a violation exits `2` to surface the problem to Claude rather than just
+  printing a warning. Flip the `exit 2` in the script to `exit 0` for warn-only.
+- **How it decides:** `scripts/check-flow-language.mjs` extracts the paragraph,
+  then PASSes only if it has Swedish signals (`å/ä/ö` or ≥2 Swedish marker
+  words) *and* contains no English marker words. It is a deterministic heuristic,
+  not a real language detector — fine for a lab, easy to extend.
 
 ## How I verified them with `/hooks`
 

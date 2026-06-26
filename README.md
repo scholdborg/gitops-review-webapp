@@ -88,6 +88,7 @@ All three are **project-scoped** hooks, configured in
 | `guard-dog`     | `PreToolUse`  | `Bash`               | project | Block risky Bash commands before they run.         |
 | `local-review`  | `PostToolUse` | `Write\|Edit\|MultiEdit` | project | Run `npm run review` after Claude edits files.     |
 | `deploy-status` | `Stop`        | _(none)_             | project | Print a GitOps status summary when Claude is done. |
+| `flow-language-guard` | `PostToolUse` | `Write\|Edit\|MultiEdit` | project | Require the `#flow-text` box in `index.html` to be Swedish; block (exit 2) if not. |
 
 ### 1. `guard-dog` (PreToolUse, matcher `Bash`)
 
@@ -116,6 +117,17 @@ branch, whether the working tree is clean, whether `npm run review` passes,
 whether `npm run build` passes, and a reminder that deployment happens from
 GitHub Actions after pushing to `main`. Always exits `0`; never fails the
 session.
+
+### 4. `flow-language-guard` (PostToolUse, matcher `Write|Edit|MultiEdit`)
+
+A content-policy example. The "flow" text box is marked with `id="flow-text"` in
+`public/index.html`. After any edit, this hook runs
+`node scripts/check-flow-language.mjs`, which extracts that paragraph and
+verifies it is written in **Swedish** (requires `å/ä/ö` or Swedish marker words,
+and rejects English marker words). If the text is not Swedish the hook **exits
+`2`**, so Claude is told to fix it. (Change the `exit 2` in the script to
+`exit 0` to make it a non-blocking warning instead.) Run the check standalone
+with `npm run check:flow-language`.
 
 ---
 
